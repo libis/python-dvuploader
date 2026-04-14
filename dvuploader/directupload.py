@@ -101,7 +101,7 @@ async def direct_upload(
 
     headers = {
         "X-Dataverse-key": api_token,
-        "x-amz-tagging": "dv-state=temp",
+        #"x-amz-tagging": "dv-state=temp",
     }
 
     pbar = progress.add_task("╰── [bold white]Registering files", total=1)
@@ -266,7 +266,7 @@ async def _upload_singlepart(
 
     headers = {
         "X-Dataverse-key": api_token,
-        "x-amz-tagging": "dv-state=temp",
+        #"x-amz-tagging": "dv-state=temp",
         "Content-length": str(file._size),
     }
 
