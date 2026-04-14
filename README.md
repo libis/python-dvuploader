@@ -2,8 +2,10 @@
   Dataverse Uploader</br>
   <a href="https://badge.fury.io/py/dvuploader"><img src="https://badge.fury.io/py/dvuploader.svg" alt="PyPI version" height="18"></a>
   <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/dvuploader">
-  <img src="https://github.com/gdcc/python-dvuploader/actions/workflows/test.yml/badge.svg" alt="Build Badge">
+  <img src="https://github.com/libis/python-dvuploader/actions/workflows/test.yml/badge.svg" alt="Build Badge">
 </h1>
+
+> **Note:** This is a fork of [gdcc/python-dvuploader](https://github.com/gdcc/python-dvuploader) maintained by [LIBIS (KU Leuven)](https://github.com/libis). The fork removes the `x-amz-tagging: dv-state=temp` header from S3 upload requests, which is not supported by all S3-compatible backends (e.g. IBM/Red Hat OpenStack Swift S3). Upstream sends this header to mark uploads as temporary for lifecycle-based cleanup; our Dataverse instance uses the [`cleanStorage` API](https://guides.dataverse.org/en/latest/api/native-api.html) for cleanup instead.
 
 Python equivalent to the [DVUploader](https://github.com/GlobalDataverseCommunityConsortium/dataverse-uploader) written in Java. Complements other libraries written in Python and facilitates the upload of files to a Dataverse instance via [Direct Upload](https://guides.dataverse.org/en/latest/developers/s3-direct-upload-api.html).
 
@@ -30,7 +32,7 @@ python3 -m pip install dvuploader
 or by source
 
 ```bash
-git clone https://github.com/gdcc/python-dvuploader.git
+git clone https://github.com/libis/python-dvuploader.git
 cd python-dvuploader
 python3 -m pip install .
 ```
@@ -165,6 +167,31 @@ dvuploader = dv.DVUploader(files=files)
 The retry logic uses exponential backoff which ensures that subsequent retries will be longer, but won't exceed exceed `max_retry_time`. This is particularly useful when dealing with native uploads that may be subject to intermediate locks on the Dataverse side.
 
 ## Troubleshooting
+
+#### Python 3.14 — `TypeError: cannot create weak reference to 'NoneType' object`
+
+Python 3.14 is currently **not supported**. The `anyio` library (a dependency of `httpx`) is incompatible with Python 3.14 due to a change in how `asyncio.current_task()` behaves during event loop startup. This manifests as:
+
+```
+TypeError: cannot create weak reference to 'NoneType' object
+```
+
+Use Python **3.13.13 or higher within the 3.13.x series** (do not use 3.14+). If you manage Python versions with [`asdf`](https://asdf-vm.com/), a `.tool-versions` file is included in this repository pinning the recommended version. Simply run:
+
+```bash
+asdf install
+pip install dvuploader
+asdf reshim python
+```
+
+Or to set it up manually:
+
+```bash
+asdf install python 3.13.13
+asdf set python 3.13.13
+pip install dvuploader
+asdf reshim python
+```
 
 #### `500` error and `OptimisticLockException`
 
